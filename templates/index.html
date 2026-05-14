@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SmartMail Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero">
+        <p class="eyebrow">AI email writing assistant</p>
+        <h1>SmartMail Generator</h1>
+        <p class="subtitle">Turn a short topic into a polished email with the tone you need.</p>
+      </section>
+
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Create an email</h2>
+        <form id="email-form">
+          <label for="topic">Email topic</label>
+          <textarea id="topic" name="topic" rows="5" placeholder="Example: Follow up after today's product demo" required></textarea>
+
+          <label for="recipient">Recipient (optional)</label>
+          <input id="recipient" name="recipient" type="text" placeholder="Example: Jordan from Acme Co.">
+
+          <label for="tone">Tone</label>
+          <select id="tone" name="tone">
+            {% for tone in tones %}
+              <option value="{{ tone }}">{{ tone.title() }}</option>
+            {% endfor %}
+          </select>
+
+          <button type="submit">Generate email</button>
+        </form>
+      </section>
+
+      <section class="card output-card" aria-live="polite">
+        <h2>Generated email</h2>
+        <pre id="output">Your email will appear here.</pre>
+      </section>
+    </main>
+
+    <script>
+      const form = document.querySelector('#email-form');
+      const output = document.querySelector('#output');
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        output.textContent = 'Generating...';
+
+        const response = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(new FormData(form)))
+        });
+
+        const data = await response.json();
+        output.textContent = response.ok ? data.email : data.error;
+      });
+    </script>
+  </body>
+</html>
